@@ -1,0 +1,26 @@
+<div ng-controller="dashboardController">
+	<form class="form-inline" role="form">
+		  <div class="form-group">
+		    <label for="title">Title:</label>
+		    <input type="text" class="form-control" ng-model="newBucket.title">
+		  </div>
+		  <div class="form-group">
+		    <label for="descriptsion">Description:</label>
+		    <input type="text" class="form-control" ng-model="newBucket.description">
+		  </div>
+		  <select ng-model="newBucket.user_name">
+		  	<option ng-repeat="user in users">{{ user.name }}</option>
+		  </select>
+		  <button class="btn btn-default btn-sm" ng-click="addBucket()">Add</button>
+		</form>
+	<h3>Bucket Lists:</h3>
+	<ul>
+		<li ng-repeat="bucket in buckets">{{ bucket.username }} | {{ bucket.title }} | {{ bucket.description }}</li>
+	</ul>
+	<h3>List of other users</h3>
+	<ul>
+		<a href="#/user"><li ng-repeat="user in users" ng-click="seeUser($index)">{{ user.name }}</li></a>
+	</ul>
+</div>
+
+<p>DASHBOARD partial</p>

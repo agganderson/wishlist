@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang='en' ng-app='myApp'>
+<head>
+	<title></title>
+		<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular-route.min.js"></script>
+
+    <script type="text/javascript">
+
+    	var myApp = angular.module('myApp', ['ngRoute']);
+
+    	myApp.config(function ($routeProvider){
+    		$routeProvider
+    			.when('/dashboard', {
+    				templateUrl: 'partials/dashboard.html'
+    			})
+    			.when('/user', {
+					templateUrl: 'partials/user.html'
+				})
+    			.otherwise({
+    				redirectTo: '/'
+    			});
+    	});
+
+    	// USER CONTROLLER BEGINS
+    	myApp.controller('userController', function($scope, userFactory){
+    		$scope.users = [];
+
+    		userFactory.index(function(info){
+    			// console.log(info);
+    			$scope.users = info;
+    		});
+
+    		$scope.addUser = function(data){
+    			// console.log($scope.newUser);
+    			userFactory.create($scope.newUser, function(data){
+    				$scope.users = data;
+    			});
+    			$scope.newUser = {};
+    		}
+
+    		$scope.seeUser = function($index){
+    			// console.log($index);
+    			userFactory.show($index, function(data){
+    				$scope.user = data;
+    				// console.log($scope.user);
+    			});
+    		}
+
+    	});
+
+    	// BUCKETLIST CONTROLLER BEGINS
+    	myApp.controller('dashboardController', function($scope, userFactory, bucketFactory){
+    		$scope.users = [];
+    		$scope.bucketlists = [];
+
+    		userFactory.index(function(info){
+    			$scope.user = info;
+    		});
+
+    		$scope.addBucket = function(data){
+    			bucketFactory.create($scope.newBucket, function(data){
+    				$scope.bucketlists = data;
+    			});
+    			$scope.newBucket = {};
+    		}
+    	});
+
+
+    	// USER FACTORY BEGINS HERE
+    	myApp.factory('userFactory', function($http){
+    		var factory = {};
+    		var users = [];
+
+    		factory.index = function(callback){
+    			$http.get('/dashboard').success(function(output){
+    				users = output;
+    				callback(users);
+    			});
+    		}
+
+    		factory.create = function(info, callback){
+    			// console.log(info);
+    			$http.post('/users', info).success(function(output){
+    				users.push(output);
+    				factory.index(callback);
+    				callback();
+    			});
+    		}
+
+    		factory.show = function(index, callback){
+    			$http.get('/users/' + users[index]._id).success(function(output){
+    				// console.log(output);
+    				user = output;
+    				// console.log(user);
+    				callback();
+    			})
+    		}
+
+
+    		return factory;
+    	});
+
+    	//BUCKETLIST FACTORY BEGINS HERE
+    	myApp.factory('bucketFactory', function($http){
+    		var factory = {};
+    		var buckets = [];
+
+    		factory.index = function(callbcak){
+    			$http.get('/buckets').success(function(output){
+    				buckets = output;
+    				callback(buckets);
+    			});
+    		}
+
+    		factory.create = function(info, callback){
+    			$http.post('/buckets', info).success(function(output){
+    				buckets.push(output);
+    				factory.index(callback);
+    				callback();
+    			});
+    		}
+    		return factory;
+    	})
+
+    </script>
+
+</head>
+<body>
+	<div class="container" ng-controller="userController">
+		<h1>Bucket List</h1>
+
+		<form class="form-inline" role="form">
+		  <div class="form-group">
+		    <label for="name">Your Name Please:</label>
+		    <input type="text" class="form-control" ng-model="newUser.name">
+		  </div>
+		  <a href="#/dashboard" class="btn btn-default btn-sm" ng-click="addUser()">Enter</a>
+		</form>
+		<a href="#/dashboard">Dashboard</a><br>
+		<a href="/">Logout</a>
+		<div ng-view="">
+		</div>
+	</div>
+</body>
+</html>
